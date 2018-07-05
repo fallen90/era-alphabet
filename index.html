@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Alphabet</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <style>
+    body {
+        user-select: none;
+    }
+
+    .letter {
+        display: block;
+        width: 100%;
+        height: 100%;
+        font-size: 80vh;
+        text-align: center;
+    }
+
+    .hand-signs {
+        height: 61vh;
+        margin-top: -13vh;
+        margin-left: 50px;
+    }
+
+    .shape {
+        padding: 90px;
+        width: 10px;
+        background: #ff6c62;
+        display: inline-block;
+        border-radius: 100%;
+        float:left;
+        margin-top:50px;
+        margin-left:25px;
+        opacity:0;
+    }
+    .shape.show {
+        transition:250ms opacity ease-in-out;
+        opacity:1;
+    }
+    .letter.centered {
+        padding:5vw;
+    }
+    .letter.centered::after{
+        clear:both;
+    }
+    </style>
+</head>
+
+<body>
+    <h1 class="letter">A</h1>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+    <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
+    <script>
+    window.countingSigns = 'animated';
+
+    $(document).ready(() => {
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function hexToRgb(hex) {
+
+            if (hex.charAt && hex.charAt(0) === '#') {
+                hex = removeHash(hex)
+            }
+
+            if (hex.length === 3) {
+                hex = expand(hex)
+            }
+
+            var bigint = parseInt(hex, 16)
+            var r = (bigint >> 16) & 255
+            var g = (bigint >> 8) & 255
+            var b = bigint & 255
+
+            return [r, g, b]
+        }
+
+        function removeHash(hex) {
+
+            var arr = hex.split('')
+            arr.shift()
+            return arr.join('')
+        }
+
+        function expand(hex) {
+
+            return hex
+                .split('')
+                .reduce(function(accum, value) {
+
+                    return accum.concat([value, value])
+                }, [])
+                .join('')
+        }
+
+        function contrast(hex) {
+            var rgb = hexToRgb(hex);
+            var o = Math.round(((parseInt(rgb[0]) * 299) + (parseInt(rgb[1]) * 587) + (parseInt(rgb[2]) * 114)) / 1000);
+
+            return (o <= 180) ? 'dark' : 'light';
+        }
+
+        function createAnimated(key) {
+            let html = [];
+
+            for (var i = key -1; i >= 0; i--) {
+                const shape = `<div class="shape" style="background:${getRandomColor()}"></div>`;
+                html.push(shape);
+            }
+
+            $('.letter').addClass('centered').empty().append(html.join(''));
+
+            $('.letter').find('.shape').each(function(){
+                const self = this;
+                $(self).animate({
+                    opacity : 1
+                }, 1000);
+            });
+        }
+
+        //a-z 65-90
+        $(document).on('keydown', e => {
+            e.preventDefault();
+            console.log(e.which);
+            if (e.which >= 48 && e.which <= 90) {
+                let key = e.key.toUpperCase();
+
+                if (e.which == 48)
+                    key = "10";
+
+                if (!isNaN(key)) {
+                    if (window.countingSigns === 'hands') {
+                        $('.letter').html(`<span>${key}</span><img src="/assets/${key}-hand.jpg" class="hand-signs">`);
+                    } else if (window.countingSigns === 'shapes') {
+                        $('.letter').html(`<span>${key}</span><img src="/assets/${key}-shapes.png" class="shapes-signs">`);
+                    } else if (window.countingSigns === 'animated') {
+                        createAnimated(key);
+                    }
+                } else {
+                    $('.letter').html(key);
+                }
+
+                responsiveVoice.speak(key, "US English Female", { rate: 0.7 });
+            } else if (e.which == 17) {
+                let bgColor = getRandomColor();
+                let textColor = '#000';
+
+                if (contrast(bgColor) === 'light') {
+                    textColor = '#000';
+                } else {
+                    textColor = '#fff'
+                }
+
+                $('body').css({ 'background-color': bgColor, 'color': textColor });
+            } else if (e.which == 16) {
+                var CSS_COLOR_NAMES = ["AliceBlue", "AntiqueWhite", "Aqua", "Aquamarine", "Azure", "Beige", "Bisque", "Black", "BlanchedAlmond", "Blue", "BlueViolet", "Brown", "BurlyWood", "CadetBlue", "Chartreuse", "Chocolate", "Coral", "CornflowerBlue", "Cornsilk", "Crimson", "Cyan", "DarkBlue", "DarkCyan", "DarkGoldenRod", "DarkGray", "DarkGrey", "DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOliveGreen", "Darkorange", "DarkOrchid", "DarkRed", "DarkSalmon", "DarkSeaGreen", "DarkSlateBlue", "DarkSlateGray", "DarkSlateGrey", "DarkTurquoise", "DarkViolet", "DeepPink", "DeepSkyBlue", "DimGray", "DimGrey", "DodgerBlue", "FireBrick", "FloralWhite", "ForestGreen", "Fuchsia", "Gainsboro", "GhostWhite", "Gold", "GoldenRod", "Gray", "Grey", "Green", "GreenYellow", "HoneyDew", "HotPink", "IndianRed", "Indigo", "Ivory", "Khaki", "Lavender", "LavenderBlush", "LawnGreen", "LemonChiffon", "LightBlue", "LightCoral", "LightCyan", "LightGoldenRodYellow", "LightGray", "LightGrey", "LightGreen", "LightPink", "LightSalmon", "LightSeaGreen", "LightSkyBlue", "LightSlateGray", "LightSlateGrey", "LightSteelBlue", "LightYellow", "Lime", "LimeGreen", "Linen", "Magenta", "Maroon", "MediumAquaMarine", "MediumBlue", "MediumOrchid", "MediumPurple", "MediumSeaGreen", "MediumSlateBlue", "MediumSpringGreen", "MediumTurquoise", "MediumVioletRed", "MidnightBlue", "MintCream", "MistyRose", "Moccasin", "NavajoWhite", "Navy", "OldLace", "Olive", "OliveDrab", "Orange", "OrangeRed", "Orchid", "PaleGoldenRod", "PaleGreen", "PaleTurquoise", "PaleVioletRed", "PapayaWhip", "PeachPuff", "Peru", "Pink", "Plum", "PowderBlue", "Purple", "Red", "RosyBrown", "RoyalBlue", "SaddleBrown", "Salmon", "SandyBrown", "SeaGreen", "SeaShell", "Sienna", "Silver", "SkyBlue", "SlateBlue", "SlateGray", "SlateGrey", "Snow", "SpringGreen", "SteelBlue", "Tan", "Teal", "Thistle", "Tomato", "Turquoise", "Violet", "Wheat", "White", "WhiteSmoke", "Yellow", "YellowGreen"];
+
+                let bgColor = CSS_COLOR_NAMES[Math.floor(Math.random() * CSS_COLOR_NAMES.length)];;
+                let textColor = '#000';
+
+                if (contrast(bgColor) === 'light') {
+                    textColor = '#000';
+                } else {
+                    textColor = '#fff'
+                }
+
+                $('body').css({ 'background-color': bgColor, 'color': textColor });
+                responsiveVoice.speak(bgColor, "US English Female");
+            }
+        });
+    });
+    </script>
+</body>
+
+</html>
